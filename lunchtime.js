@@ -13,7 +13,7 @@ var tidy = require('htmltidy').tidy;
 var url = 'http://extranet.novae-restauration.ch/novae/traiteur/restauration/restaurant-cern.html?frame=1';
 
 var startOfWeek = moment().startOf('isoWeek').format("YYYY-MM-DD");
-var weekCacheFilename = "data/" + startOfWeek + ".json";
+var weekCacheFilename = "/root/public_data/" + startOfWeek + ".json";
 var today = moment();
 if (today.isoWeekday() >= 6) {
   // Adjust today to next Monday if Saturday or Sunday
@@ -28,7 +28,6 @@ if (args.length > 0) {
 var menu;
 try {
   menu = JSON.parse(fs.readFileSync(weekCacheFilename));
-  printMenu(menu);
   process.exit();
 } catch (e) {
   if (e.code != 'ENOENT') {
@@ -60,7 +59,6 @@ function mergePageResults(err, results) {
       weekMenu[day] = (weekMenu[day]||[]).concat(results[el][day]);
     });
   }
-  printMenu(weekMenu);
   fs.writeFile(weekCacheFilename, JSON.stringify(weekMenu, null, 4), 'utf8');
 });
 
@@ -119,26 +117,4 @@ function parseMenuForPage(html) {
   });
 
   return menu;
-}
-
-function printMenu(menu) {
-  var table = new AsciiTable();
-  var days = Object.keys(menu);
-  var types = {};
-  var todayWeekday = today.isoWeekday() - 1;
-
-  table.setHeading([''].concat(days[todayWeekday]));
-  [days[todayWeekday]].forEach(function(day, i) {
-    var options = menu[day];
-    options.forEach(function(option) {
-      var descr = option.description + " (" + option.price + ")";
-      types[option.type] = (types[option.type]||[option.type]).concat(descr);
-    });
-  });
-
-  for (var type in types) {
-    table.addRow(types[type]);
-  }
-
-  console.log(table.toString());
 }
