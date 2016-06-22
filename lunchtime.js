@@ -12,8 +12,7 @@ var tidy = require('htmltidy').tidy;
 
 var url = 'http://extranet.novae-restauration.ch/novae/traiteur/restauration/restaurant-cern.html?frame=1';
 
-var startOfWeek = moment().startOf('isoWeek').format("YYYY-MM-DD");
-var weekCacheFilename = "/root/public_data/" + startOfWeek + ".json";
+var weekCacheFilename = "/root/public_data/menu.json";
 var today = moment();
 if (today.isoWeekday() >= 6) {
   // Adjust today to next Monday if Saturday or Sunday
@@ -26,15 +25,6 @@ if (args.length > 0) {
 }
 
 var menu;
-try {
-  menu = JSON.parse(fs.readFileSync(weekCacheFilename));
-  process.exit();
-} catch (e) {
-  if (e.code != 'ENOENT') {
-    throw e;
-  }
-  console.log("Nothing in cache.");
-}
 
 // Fetch week menu
 async.waterfall([
